@@ -100,28 +100,15 @@
     //"format": " {:%I:%M %p}", // AM PM format
     "format": " {:%H:%M:%S}", // 24H
 	"format-alt": " {:%H:%M   %Y, %d %B, %A}",
-	"tooltip-format": "<tt><small>{calendar}</small></tt>",
-	"calendar": {
-		"mode": "year",
-		"mode-mon-col": 3,
-		"weeks-pos": "right",
-		"on-scroll": 1,
-		"format": {
-			"months": "<span color='#ffead3'><b>{}</b></span>",
-			"days": "<span color='#ecc6d9'><b>{}</b></span>",
-			"weeks": "<span color='#99ffdd'><b>W{:%V}</b></span>",
-			"weekdays": "<span color='#ffcc66'><b>{}</b></span>",
-			"today": "<span color='#ff6699'><b><u>{}</u></b></span>"
-		}
-	}
-},
-
-"actions": {
-	"on-click-right": "mode",
-	"on-click-forward": "tz_up",
-	"on-click-backward": "tz_down",
-	"on-scroll-up": "shift_up",
-	"on-scroll-down": "shift_down"
+	"format-alt-click": 1,
+	// Built-in hover calendar disabled on purpose: with interval:1 (needed for
+	// the seconds in "format" above), waybar re-queries the GTK tooltip every
+	// single second even while it's already open, which is what made the
+	// popup jump/glitch and briefly show stale bar content while hovering.
+	// Replaced below with a right-click popup that doesn't re-render every
+	// second and stays open until you click away (or right-click again).
+	"tooltip": false,
+	"on-click-right": "$HOME/.config/hypr/scripts/WaybarYearCalendar.py",
 },
 
 "clock#2": {

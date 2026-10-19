@@ -3,8 +3,19 @@
 # This is for changing kb_layouts. Set kb_layouts in $settings_file
 
 layout_file="$HOME/.cache/kb_layout"
-settings_file="$HOME/.config/hypr/UserConfigs/UserSettings.conf"
+settings_file="$HOME/.config/hypr/UserConfigs/UserSettings.lua"
 notif_icon="$HOME/.config/swaync/images/ja.png"
+
+# UserSettings.lua passes settings to hl.config({...}) rather than hyprlang
+# `key = value` lines, so pull input.kb_layout out with a real Lua
+# interpreter instead of grep/cut (which would also pick up the Lua table's
+# own quoting/commas and mangle the value).
+get_kb_layout() {
+  lua - "$settings_file" <<'LUA'
+hl = { config = function(t) io.write((t.input and t.input.kb_layout) or "") end }
+dofile(arg[1])
+LUA
+}
 
 # Refined ignore list with patterns or specific device names
 ignore_patterns=(
@@ -15,28 +26,24 @@ ignore_patterns=(
   )
 
 
+# Read available layouts from settings file
+if [ ! -f "$settings_file" ]; then
+  echo "Settings file not found!"
+  exit 1
+fi
+kb_layout_line=$(get_kb_layout | tr -d '[:space:]')
+IFS=',' read -r -a layout_mapping <<< "$kb_layout_line"
+
 # Create layout file with default layout if it does not exist
 if [ ! -f "$layout_file" ]; then
   echo "Creating layout file..."
-  default_layout=$(grep 'kb_layout = ' "$settings_file" | cut -d '=' -f 2 | tr -d '[:space:]' | cut -d ',' -f 1 2>/dev/null)
-  default_layout=${default_layout:-"us"} # Default to 'us' layout
+  default_layout=${layout_mapping[0]:-"us"} # Default to 'us' layout
   echo "$default_layout" > "$layout_file"
   echo "Default layout set to $default_layout"
 fi
 
 current_layout=$(cat "$layout_file")
 echo "Current layout: $current_layout"
-
-# Read available layouts from settings file
-if [ -f "$settings_file" ]; then
-  kb_layout_line=$(grep 'kb_layout = ' "$settings_file" | cut -d '=' -f 2)
-  # Remove leading and trailing spaces around each layout
-  kb_layout_line=$(echo "$kb_layout_line" | tr -d '[:space:]')
-  IFS=',' read -r -a layout_mapping <<< "$kb_layout_line"
-else
-  echo "Settings file not found!"
-  exit 1
-fi
 
 layout_count=${#layout_mapping[@]}
 echo "Number of layouts: $layout_count"

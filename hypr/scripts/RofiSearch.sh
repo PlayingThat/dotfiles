@@ -3,7 +3,7 @@
 # For Searching via web browsers
 
 # Define the path to the config file
-config_file=$HOME/.config/hypr/UserConfigs/01-UserDefaults.conf
+config_file=$HOME/.config/hypr/UserConfigs/01-UserDefaults.lua
 
 # Check if the config file exists
 if [[ ! -f "$config_file" ]]; then
@@ -11,15 +11,18 @@ if [[ ! -f "$config_file" ]]; then
     exit 1
 fi
 
-# Process the config file in memory, removing the $ and fixing spaces
-config_content=$(sed 's/\$//g' "$config_file" | sed 's/ = /=/')
+# 01-UserDefaults.lua returns a table, not hyprlang syntax, so pull
+# search_engine out with a real Lua interpreter.
+Search_Engine=$(lua - "$config_file" <<'LUA'
+hl = { env = function() end }
+local d = dofile(arg[1])
+io.write(d.search_engine or "")
+LUA
+)
 
-# Source the modified content directly from the variable
-eval "$config_content"
-
-# Check if $term is set correctly
+# Check if $Search_Engine is set correctly
 if [[ -z "$Search_Engine" ]]; then
-    echo "Error: \$Search_Engine is not set in the configuration file!"
+    echo "Error: search_engine is not set in 01-UserDefaults.lua!"
     exit 1
 fi
 

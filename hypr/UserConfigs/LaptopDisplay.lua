@@ -1,0 +1,3 @@
+-- NOTE: sourced by hyprland.lua but currently a no-op, matching the original LaptopDisplay.conf
+-- (which only contains a commented-out `monitor = eDP-1, preferred, auto, 1` line).
+-- See Laptops.conf / UserConfigs/Laptops.lua comments for the disabled lid-switch-rewrite trick.

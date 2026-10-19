@@ -7,6 +7,6 @@ monitor_count=$(echo "$output" | grep -c "^Monitor")
 
 # Check if there is more than one monitor
 if [ "$monitor_count" -gt 1 ]; then
-    hyprctl keyword monitor "eDP-1, disable"
+    hyprctl eval 'hl.monitor({ output = "eDP-1", disabled = true })'
 fi
 

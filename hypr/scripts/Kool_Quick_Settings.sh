@@ -3,11 +3,17 @@
 # Rofi menu for KooL Hyprland Quick Settings (SUPER SHIFT E)
 
 # Modify this config file for default terminal and EDITOR
-config_file="$HOME/.config/hypr/UserConfigs/01-UserDefaults.conf"
+config_file="$HOME/.config/hypr/UserConfigs/01-UserDefaults.lua"
 
-tmp_config_file=$(mktemp)
-sed 's/^\$//g; s/ = /=/g' "$config_file" > "$tmp_config_file"
-source "$tmp_config_file"
+# 01-UserDefaults.lua returns a table (term/edit/files/search_engine), it's
+# not hyprlang syntax anymore, so pull the values out with a real Lua
+# interpreter instead of the old sed/source text-munging.
+read -r term edit <<< "$(lua - "$config_file" <<'LUA'
+hl = { env = function() end }
+local d = dofile(arg[1])
+print((d.term or "kitty") .. "\t" .. (d.edit or "nvim"))
+LUA
+)"
 # ##################################### #
 
 # variables
@@ -53,16 +59,16 @@ main() {
     
     # Map choices to corresponding files
     case "$choice" in
-    	"view/edit User Defaults") file="$UserConfigs/01-UserDefaults.conf" ;;
-        "view/edit ENV variables") file="$UserConfigs/ENVariables.conf" ;;
-        "view/edit Window Rules") file="$UserConfigs/WindowRules.conf" ;;
-        "view/edit User Keybinds") file="$UserConfigs/UserKeybinds.conf" ;;
-        "view/edit User Settings") file="$UserConfigs/UserSettings.conf" ;;
-        "view/edit Startup Apps") file="$UserConfigs/Startup_Apps.conf" ;;
-        "view/edit Decorations") file="$UserConfigs/UserDecorations.conf" ;;
-        "view/edit Animations") file="$UserConfigs/UserAnimations.conf" ;;
-        "view/edit Laptop Keybinds") file="$UserConfigs/Laptops.conf" ;;
-        "view/edit Default Keybinds") file="$configs/Keybinds.conf" ;;
+    	"view/edit User Defaults") file="$UserConfigs/01-UserDefaults.lua" ;;
+        "view/edit ENV variables") file="$UserConfigs/ENVariables.lua" ;;
+        "view/edit Window Rules") file="$UserConfigs/WindowRules.lua" ;;
+        "view/edit User Keybinds") file="$UserConfigs/UserKeybinds.lua" ;;
+        "view/edit User Settings") file="$UserConfigs/UserSettings.lua" ;;
+        "view/edit Startup Apps") file="$UserConfigs/Startup_Apps.lua" ;;
+        "view/edit Decorations") file="$UserConfigs/UserDecorations.lua" ;;
+        "view/edit Animations") file="$UserConfigs/UserAnimations.lua" ;;
+        "view/edit Laptop Keybinds") file="$UserConfigs/Laptops.lua" ;;
+        "view/edit Default Keybinds") file="$configs/Keybinds.lua" ;;
         "Choose Kitty Terminal Theme") $scriptsDir/Kitty_themes.sh ;;
         "Configure Monitors (nwg-displays)") 
             if ! command -v nwg-displays &>/dev/null; then

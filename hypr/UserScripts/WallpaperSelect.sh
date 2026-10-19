@@ -134,24 +134,20 @@ set_sddm_wallpaper() {
 
 modify_startup_config() {
   local selected_file="$1"
-  local startup_config="$HOME/.config/hypr/UserConfigs/Startup_Apps.conf"
+  local startup_config="$HOME/.config/hypr/UserConfigs/Startup_Apps.lua"
 
-  # Check if it's a live wallpaper (video)
+  # Startup_Apps.lua picks swww-daemon vs mpvpaper at startup based on the
+  # live_wallpaper_enabled/livewallpaper locals near the top of the file
+  # (not commented-out exec-once lines anymore), so toggle those instead.
   if [[ "$selected_file" =~ \.(mp4|mkv|mov|webm)$ ]]; then
     # For video wallpapers:
-    sed -i '/^\s*exec-once\s*=\s*swww-daemon\s*--format\s*xrgb\s*$/s/^/\#/' "$startup_config"
-    sed -i '/^\s*#\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^#\s*//;' "$startup_config"
-
-    # Update the livewallpaper variable with the selected video path (using $HOME)
-    selected_file="${selected_file/#$HOME/\$HOME}" # Replace /home/user with $HOME
-    sed -i "s|^\$livewallpaper=.*|\$livewallpaper=\"$selected_file\"|" "$startup_config"
+    sed -i 's/^local live_wallpaper_enabled = .*/local live_wallpaper_enabled = true/' "$startup_config"
+    sed -i "s|^local livewallpaper = .*|local livewallpaper = \"$selected_file\"|" "$startup_config"
 
     echo "Configured for live wallpaper (video)."
   else
     # For image wallpapers:
-    sed -i '/^\s*#\s*exec-once\s*=\s*swww-daemon\s*--format\s*xrgb\s*$/s/^\s*#\s*//;' "$startup_config"
-
-    sed -i '/^\s*exec-once\s*=\s*mpvpaper\s*.*$/s/^/\#/' "$startup_config"
+    sed -i 's/^local live_wallpaper_enabled = .*/local live_wallpaper_enabled = false/' "$startup_config"
 
     echo "Configured for static wallpaper (image)."
   fi
@@ -219,7 +215,7 @@ main() {
     exit 1
   fi
 
-  # Modify the Startup_Apps.conf file based on wallpaper type
+  # Modify the Startup_Apps.lua file based on wallpaper type
   modify_startup_config "$selected_file"
 
   # **CHECK FIRST** if it's a video or an image **before calling any function**

@@ -1,10 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
 # Screenshots scripts
 
 # variables
 time=$(date "+%d-%b_%H-%M-%S")
-dir="$(xdg-user-dir PICTURES)/Screenshots"
+PICTURES_DIR="$(xdg-user-dir PICTURES 2>/dev/null || echo "$HOME/Pictures")"
+dir="$PICTURES_DIR/Screenshots"
 file="Screenshot_${time}_${RANDOM}.png"
 
 iDIR="$HOME/.config/swaync/icons"
@@ -108,7 +109,7 @@ shotwin() {
 
 shotarea() {
 	tmpfile=$(mktemp)
-	grim -g "$(slurp)" - >"$tmpfile"
+	geom=$(slurp) && sleep 0.5 && grim -g "$geom" - >"$tmpfile"
 
   # Copy with saving
 	if [[ -s "$tmpfile" ]]; then
@@ -130,7 +131,7 @@ shotactive() {
 
 shotswappy() {
 	tmpfile=$(mktemp)
-	grim -g "$(slurp)" - >"$tmpfile" 
+	geom=$(slurp) && sleep 0.5 && grim -g "$geom" - >"$tmpfile" 
 
   # Copy without saving
   if [[ -s "$tmpfile" ]]; then
